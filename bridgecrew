@@ -1,0 +1,24 @@
+pipeline {
+    any {
+        docker {
+            image 'kennethreitz/pipenv:latest'
+            args '-u root --privileged -v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
+    stages {
+        stage('test') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: 'master']], userRemoteConfigs: [[url: 'https://github.com/Babila9921234567/jenkins-example-checkov/new/main']]])
+                script { 
+                    sh """pipenv install
+                    pipenv run pip install bridgecrew
+                    pipenv run bridgecrew --directory . --bc-api-key f3e9fce5-7579-446e-ade6-37a968c06eb2 --repo-id new/main"""
+                }
+            }
+        }
+    }
+    options {
+        preserveStashes()
+        timestamps()
+    }
+}
